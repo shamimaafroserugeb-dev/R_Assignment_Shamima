@@ -3,7 +3,7 @@
     "path": "~/BCB5460/R/R_Assignment.R",
     "project_path": "R/R_Assignment.R",
     "type": "r_source",
-    "hash": "0",
+    "hash": "1501703030",
     "contents": "",
     "dirty": false,
     "created": 1772221443960.0,
@@ -16,11 +16,11 @@
         "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1773252639,
+    "lastKnownWriteTime": 1773420560,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1773252639240,
+    "last_content_update": 1773420560567,
     "read_only": false,
     "read_only_alternatives": []
 }
