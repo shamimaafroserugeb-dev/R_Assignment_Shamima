@@ -1,0 +1,211 @@
+---
+title: "R_Assignment_BCB5460"
+author: "Shamima Afrose"
+date: "2026-03-15"
+output: html_document
+---
+#Data Preparation
+Two files named fang_et_al_genotypes.txt and snp_position.txt are obatined from the GitHub repository utiizing the raw links, stored in the object fang and snp respectively. 
+```{r} 
+url_raw <- "https://raw.githubusercontent.com/EEOB-BioData/BCB546_Spring2024/main/assignments/UNIX_Assignment/fang_et_al_genotypes.txt"
+fang <- read.delim(url_raw, header = TRUE, sep = "\t", quote = "")
+url_raw2 <-"https://raw.githubusercontent.com/EEOB-BioData/BCB546_Spring2024/main/assignments/UNIX_Assignment/snp_position.txt"
+snp <- read.delim(url_raw2, header = TRUE, sep = "\t", quote = "")
+```
+#Data Inspection 
+The following codes are used to know the attributes of the two imported files. fang et al. has 2782 rows with 986 columns and snp has 983 rows with 15 columns. Both files are dataframe with a size of 22681376 bytes and 327392 bytes, respectively.
+```{r} 
+dim(fang) 
+dim(snp) 
+head(fang) 
+head(snp) 
+object.size(fang) 
+object.size(snp) 
+class(fang) 
+str(fang) 
+class(snp) 
+str(snp)
+```
+#Data Processing
+## Step 01: Transpose the fang_et_al_genotypes.txt and merge 
+The genotype file is transposed and the first three rows are separated. A new SNP_ID column is created from the row names and merge with snp information according to SNP ID.
+```{r}
+library(dplyr) 
+t_fang <- t(fang) 
+fang_group <- t_fang[c(1:3),] %>% as.data.frame() 
+fang_data <- t_fang[-c(1:3),] %>% as.data.frame() 
+fang_data$SNP_ID <- rownames(fang_data) 
+merge <- dplyr::inner_join(snp, fang_data, by = "SNP_ID") 
+merge_group <- bind_rows(fang_group, merge) %>% t() %>% as.data.frame() 
+```
+##Step 02: Split the merged files into maize and teosinte groups
+The maize group contains ZMMIL, ZMMLR, and ZMMMR samples, while the teosinte group contains ZMPBA, ZMPIL, and ZMPJA samples. Chromosome and Position information are retained, and rows labeled as multiple or unknown chromosomes are removed.
+```{r}
+maize_group <- merge_group %>% 
+  dplyr::filter(Group %in% c("ZMMIL", "ZMMLR", "ZMMMR")) %>% 
+  rbind(merge_group[c("Chromosome","Position"),]) %>% 
+  t() %>% 
+  as.data.frame() 
+maize_group <- filter(maize_group, Chromosome != "multiple" & Chromosome != "unknown") 
+teosinte_group <- merge_group %>% 
+  dplyr::filter(Group %in% c("ZMPBA", "ZMPIL", "ZMPJA")) %>% 
+  rbind(merge_group[c("Chromosome","Position"),]) %>% 
+  t() %>% 
+  as.data.frame() 
+teosinte_group <- filter(teosinte_group, Chromosome != "multiple" & Chromosome != "unknown") 
+```
+##Split by chromosome number, and sort by genomic position
+chromosome-specific files are generated for both maize and teosinte groups and sorted by either increasing genomic position or decreasing genomic position.
+```{r}
+process_and_save_files <- function(df, group_name, chromosome) { 
+  df_inc <- df %>% 
+    filter(Chromosome == chromosome) %>% 
+    arrange(Position) %>% 
+    mutate(across(everything(), ~ifelse(is.na(.), "?", .))) 
+  write.csv(df_inc, sprintf("%s_chr%s_inc.csv", group_name, chromosome), 
+            row.names = FALSE, quote = FALSE) 
+  df_dec <- df %>%
+    filter(Chromosome == chromosome) %>% 
+    arrange(desc(Position)) %>% 
+    mutate(across(everything(), ~ifelse(is.na(.), "-", .))) 
+  write.csv(df_dec, sprintf("%s_chr%s_dec.csv", group_name, chromosome), 
+            row.names = FALSE, quote = FALSE) 
+} 
+groups <- list(maize = maize_group, teosinte = teosinte_group) 
+lapply(names(groups), function(group_name) { 
+  chromosomes <- unique(groups[[group_name]]$Chromosome) 
+   lapply(chromosomes, function(chromosome) { 
+    process_and_save_files(groups[[group_name]], group_name, chromosome) 
+}) 
+}) 
+```
+#Visualization
+##Merge group is optimized for the visualization step and chromosomes are converted into an ordered factor (1–10). 
+```{r}
+library(tidyverse) 
+library(ggplot2)
+merge_vis <- merge_group %>% 
+  t() %>% 
+  as.data.frame() %>% 
+  slice(-1) %>% 
+  mutate( 
+    Chromosome = factor(as.character(Chromosome), levels = as.character(1:10)), 
+    Position = as.numeric(as.character(Position)) 
+  ) 
+maize_group$Chromosome <- factor(maize_group$Chromosome, levels = as.character(1:10)) 
+teosinte_group$Chromosome <- factor(teosinte_group$Chromosome, levels = as.character(1:10)) 
+```
+###Answer 01: 
+Distribution of SNPs on and across chromosomes, along with SNP counts in maize or teosinte individuals are visualized using <ggplot> where, x = chromosome, and y = snp position.
+```{r}
+p0 <- merge_vis %>% 
+  count(Chromosome) %>% 
+  ggplot(aes(x = Chromosome, y = n)) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "SNP Distribution", x = "Chromosome", y = "Number of SNPs") + 
+  theme_minimal() 
+p1 <- merge_vis %>% 
+  filter(!is.na(Chromosome)) %>% 
+  ggplot(aes(x = Position, fill = Chromosome)) + 
+  geom_density(alpha = 0.4) + 
+  facet_wrap(~Chromosome, nrow = 2, ncol = 5) + 
+  labs(title = "SNP Position Distribution", x = "Position", y = "Density") + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+p2 <- maize_group %>% 
+  count(Chromosome) %>% 
+  ggplot(aes(x = Chromosome, y = n)) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "Maize - SNP Distribution", x = "Chromosome", y = "Number of SNPs") + 
+  theme_minimal() 
+p3 <- teosinte_group %>% 
+  count(Chromosome) %>% 
+  ggplot(aes(x = Chromosome, y = n)) + 
+  geom_bar(stat = "identity") + 
+  labs(title = "Teosinte - SNP Distribution", x = "Chromosome", y = "Number of SNPs") + 
+  theme_minimal() 
+p0 
+p1 
+p2 
+p3 
+pdf("SNP_Visualization.pdf") 
+print(p0) 
+print(p1) 
+print(p2) 
+print(p3) 
+dev.off() 
+```
+###Answer 02
+Each genotype is labeled as Homozygous, Missing, or Heterozygous based on the allele pattern  using <pivot_longer()>. The overall number of homozygous, heterozygous, and missing data in the entire dataset, the proportion of those states for each sample, and the proportion for each group are plotted.
+```{r}
+merge_group_long <- merge_group %>% 
+  pivot_longer(cols = starts_with("..."), names_to = "SNP", values_to = "Genotype") %>% 
+  mutate( 
+    State = case_when( 
+      Genotype %in% c("A/A", "C/C", "G/G", "T/T") ~ "Homozygous", 
+      Genotype %in% c("?/A", "?/C", "?/G", "?/T", "A/?", "C/?", "G/?", "T/?", "?/?") ~ "Missing", 
+      TRUE ~ "Heterozygous" 
+    ) 
+  ) 
+head(merge_group_long) 
+p4 <- ggplot(merge_group_long, aes(x = State, fill = State)) + 
+  geom_bar() + 
+  labs( 
+    title = "Overall Proportion of Homozygous, Heterozygous, and Missing Data", 
+    x = "Genotype State", 
+    y = "Count" 
+  ) + 
+  theme_minimal() 
+p5 <- ggplot(merge_group_long, aes(x = Sample_ID, fill = State)) + 
+  geom_bar(position = "fill") + 
+  labs( 
+    title = "Proportion of Homozygous, Heterozygous, and Missing Data by Sample", 
+    x = "Sample", 
+    y = "Proportion" 
+  ) + 
+  theme_minimal() + 
+  theme(axis.text.x = element_blank()) 
+p6 <- ggplot(merge_group_long, aes(x = Group, fill = State)) + 
+  geom_bar(position = "fill") + 
+  labs( 
+    title = "Proportion of Homozygous, Heterozygous, and Missing Data by Group", 
+    x = "Group", 
+    y = "Proportion" 
+  ) + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+p4 
+p5 
+p6 
+pdf("Homozygous_Visualization_Shamima.pdf") 
+print(p4) 
+print(p5) 
+print(p6) 
+dev.off() 
+```
+###Answer 03
+My visualizing plot focuses only on SNPs labeled as candidate and shows where they are distributed across chromosome positions.
+merge_group2 <- merge_group %>% 
+```{r}
+  t() %>% 
+  as.data.frame() %>% 
+  mutate( 
+    Chromosome = factor(as.character(Chromosome), levels = as.character(1:10)), 
+    Position = as.numeric(as.character(Position)) 
+  ) 
+p7 <- merge_group2 %>% 
+  filter(candidate.random == "candidate") %>% 
+  ggplot(aes(x = Position, fill = Chromosome)) + 
+  geom_density(alpha = 0.4) + 
+  facet_wrap(~Chromosome) + 
+  labs( 
+    title = "Distribution of Candidate SNPs Along Chromosomes", 
+    x = "Genomic Position", 
+    y = "Density" 
+  ) + 
+  theme_minimal() 
+p7 
+pdf("My_Visualization_Shamima.pdf") 
+print(p7) 
+dev.off() 
+```

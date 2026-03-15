@@ -1,0 +1,30 @@
+---
+title: "R_Assignment_BCB5460"
+author: "Shamima Afrose"
+date: "2026-03-15"
+output: html_document
+---
+#Data Preparation
+Two files named fang_et_al_genotypes.txt and snp_position.txt are obatined from the GitHub repository utiizing the raw links, stored in the object fang and snp respectively. 
+```{r} 
+url_raw <- "https://raw.githubusercontent.com/EEOB-BioData/BCB546_Spring2024/main/assignments/UNIX_Assignment/fang_et_al_genotypes.txt"
+fang <- read.delim(url_raw, header = TRUE, sep = "\t", quote = "")
+url_raw2 <-"https://raw.githubusercontent.com/EEOB-BioData/BCB546_Spring2024/main/assignments/UNIX_Assignment/snp_position.txt"
+snp <- read.delim(url_raw2, header = TRUE, sep = "\t", quote = "")
+```
+#Data Inspection 
+The following codes are used to know the attributes of the two imported files. fang et al. has 2782 rows with 986 columns and snp has 983 rows with 15 columns. Both files are dataframe with a size of 22681376 bytes and 327392 bytes, respectively.
+```{r} 
+dim(fang) 
+dim(snp) 
+head(fang) 
+head(snp) 
+object.size(fang) 
+object.size(snp) 
+class(fang) 
+str(fang) 
+class(snp) 
+str(snp)
+```
+#Data Processing
+## Step 01: Transpose the fang_et_al_genotypes.txt and merge both files
