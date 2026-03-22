@@ -1,0 +1,31 @@
+---
+title: "Peer_Review_Shamima"
+output: html_document
+date: "2026-03-20"
+---
+# Overall read ability
+Your code is very readable and laid out very well. It was easy to follow and the steps made logical sense
+
+# Data Inspection 
+Data inspection looks great and is very thorough
+
+# Data Visulaization #3
+This is the only thing that threw an error when I ran the code. took the transpose of something but didn't tell R what you actually wanted to transpose. It's hard to tell what you were trying to do here so I don't have any suggestions. 
+
+# Suggestions (your code ran perfectly so these are just suggestions so take them how you want)
+In this step "fang_data$SNP_ID <- rownames(fang_data)" I don't think its entirely necessary to rename the rows because in the merge function it allows you to add this: by.x= "SAMPLE_ID", by.y= "SNP_ID". Now you are telling R which columns you want to merge
+
+For your Maize and teosinte group files you should consider moving the group columns to the front so you can ensure the code ran properly. It would just act as a double check. You can use this code: 
+teosinte_group <- select(Group, everything())
+The way it works is by moving the column names listed before everything() to the front. This would also help to know if your maize and teosinte chromosome output files are ordered by increasing or decreasing positions. Right now you can't look at it and tell the difference. 
+
+For the data visualization #2 I used an ifelse statement so I didn't have to type out all the heterogeneous genotypes. It would cut down on typing. This is what I ran for an example. 
+
+```{r}
+Combined_long$Type <- ifelse(Combined_long$Genotype %in% c("?/?"), "Missing",
+                      ifelse(Combined_long$Genotype %in% c("A/A", "G/G", "T/T", "C/C"), "Homozygous",
+                      "Heterozygous"))
+```
+
+I liked how you did the first visual with the curvy plot. Maybe consider changing the output names so they are more descriptive of what they are plotting just for ease of reader. 
+ 
