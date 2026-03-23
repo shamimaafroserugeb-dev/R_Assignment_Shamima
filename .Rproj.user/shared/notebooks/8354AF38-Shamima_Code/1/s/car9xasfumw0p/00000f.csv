@@ -1,0 +1,4 @@
+"0","url_raw <- ""https://raw.githubusercontent.com/EEOB-BioData/BCB546_Spring2024/main/assignments/UNIX_Assignment/fang_et_al_genotypes.txt"""
+"0","fang <- read.delim(url_raw, header = TRUE, sep = ""\t"", quote = """")"
+"0","url_raw2 <-""https://raw.githubusercontent.com/EEOB-BioData/BCB546_Spring2024/main/assignments/UNIX_Assignment/snp_position.txt"""
+"0","snp <- read.delim(url_raw2, header = TRUE, sep = ""\t"", quote = """")"

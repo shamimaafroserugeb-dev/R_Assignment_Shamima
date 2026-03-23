@@ -1,0 +1,20 @@
+---
+title: "Afrose_review"
+author: "Shamima Afrose"
+date: "2026-03-23"
+output: html_document
+---
+# Overall review
+I admire the data cleaning and restructuring step, along with the attempt to add meaningful visualization.
+
+# Review of Data Inspection
+Data inspection was straightforward and sufficient for pre-assessment, and the inspection results could be added to the comments, though it's not mandatory, obviously. 
+
+# Review of Data Processing
+The data processing codes were easy to understand, and I especially noticed how you removed columns 2 and 5-15 to leave only SNP_ID, Chromosome, Position, and genotype data. The workflow is reproducible, but it depends on local file paths such as **data/fang_et_al_genotypes.txt**, which could be replaced with loading data directly from a GitHub URL.However, it doesn't affect the data processing pipeline.  
+
+# Review of Data Visualization
+The visualization part is the most praiseworthy as the SNP distribution plot clearly shows chromosomal patterns, and the heterozygosity analysis provides useful biological insight.
+
+# End of review
+

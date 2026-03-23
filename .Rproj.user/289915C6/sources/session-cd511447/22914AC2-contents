@@ -94,6 +94,10 @@ merge_vis <- merge_group %>%
   ) 
 maize_group$Chromosome <- factor(maize_group$Chromosome, levels = as.character(1:10)) 
 teosinte_group$Chromosome <- factor(teosinte_group$Chromosome, levels = as.character(1:10)) 
+maize_group <- maize_group %>% 
+  select(Chromosome, Position, everything())
+teosinte_group <- teosinte_group %>% 
+  select(Chromosome, Position, everything())
 ```
 ### Answer 01: 
 Distribution of SNPs on and across chromosomes, along with SNP counts in maize or teosinte individuals are visualized using <ggplot> where, x = chromosome, and y = snp position.
@@ -185,8 +189,8 @@ dev.off()
 ```
 ### Answer 03
 My visualizing plot focuses only on SNPs labeled as candidate and shows where they are distributed across chromosome positions.
-merge_group2 <- merge_group %>% 
 ```{r}
+merge_group2 <- merge_group %>%
   t() %>% 
   as.data.frame() %>% 
   mutate( 
