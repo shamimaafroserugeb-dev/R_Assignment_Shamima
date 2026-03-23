@@ -1,0 +1,7 @@
+"0","library(dplyr) "
+"0","t_fang <- t(fang) "
+"0","fang_group <- t_fang[c(1:3),] %>% as.data.frame() "
+"0","fang_data <- t_fang[-c(1:3),] %>% as.data.frame() "
+"0","fang_data$SNP_ID <- rownames(fang_data) "
+"0","merge <- dplyr::inner_join(snp, fang_data, by = ""SNP_ID"") "
+"0","merge_group <- bind_rows(fang_group, merge) %>% t() %>% as.data.frame() "
