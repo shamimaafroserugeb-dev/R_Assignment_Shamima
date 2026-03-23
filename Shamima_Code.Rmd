@@ -60,24 +60,29 @@ chromosome-specific files are generated for both maize and teosinte groups and s
 process_and_save_files <- function(df, group_name, chromosome) { 
   df_inc <- df %>% 
     filter(Chromosome == chromosome) %>% 
+    mutate(Position = as.numeric(as.character(Position))) %>% 
     arrange(Position) %>% 
+    select(Chromosome, Position, everything()) %>% 
     mutate(across(everything(), ~ifelse(is.na(.), "?", .))) 
-  write.csv(df_inc, sprintf("%s_chr%s_inc.csv", group_name, chromosome), 
-            row.names = FALSE, quote = FALSE) 
-  df_dec <- df %>%
+  write.csv(
+    df_inc, 
+    sprintf("%s_chr%s_inc.csv", group_name, chromosome), 
+    row.names = FALSE, 
+    quote = FALSE
+  ) 
+  df_dec <- df %>% 
     filter(Chromosome == chromosome) %>% 
+    mutate(Position = as.numeric(as.character(Position))) %>% 
     arrange(desc(Position)) %>% 
+    select(Chromosome, Position, everything()) %>% 
     mutate(across(everything(), ~ifelse(is.na(.), "-", .))) 
-  write.csv(df_dec, sprintf("%s_chr%s_dec.csv", group_name, chromosome), 
-            row.names = FALSE, quote = FALSE) 
-} 
-groups <- list(maize = maize_group, teosinte = teosinte_group) 
-lapply(names(groups), function(group_name) { 
-  chromosomes <- unique(groups[[group_name]]$Chromosome) 
-   lapply(chromosomes, function(chromosome) { 
-    process_and_save_files(groups[[group_name]], group_name, chromosome) 
-}) 
-}) 
+  write.csv(
+    df_dec, 
+    sprintf("%s_chr%s_dec.csv", group_name, chromosome), 
+    row.names = FALSE, 
+    quote = FALSE
+  ) 
+}
 ```
 # Visualization
 ## Merge group is optimized for the visualization step and chromosomes are converted into an ordered factor (1–10). 
