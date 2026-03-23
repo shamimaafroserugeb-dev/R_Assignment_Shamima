@@ -3,9 +3,9 @@
     "path": "~/BCB5460/Shamima_Code.Rmd",
     "project_path": "Shamima_Code.Rmd",
     "type": "r_markdown",
-    "hash": "787374741",
+    "hash": "220736210",
     "contents": "",
-    "dirty": false,
+    "dirty": true,
     "created": 1773593876239.0,
     "source_on_save": false,
     "relative_order": 1,
@@ -13,15 +13,15 @@
         "tempName": "Untitled3",
         "source_window_id": "",
         "Source": "Source",
-        "cursorPosition": "134,30",
-        "scrollLine": "120"
+        "cursorPosition": "77,60",
+        "scrollLine": "68"
     },
     "folds": "",
     "lastKnownWriteTime": 1774306817,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1774307039634,
+    "last_content_update": 1774307551671,
     "read_only": false,
     "read_only_alternatives": []
 }
