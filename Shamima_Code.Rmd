@@ -59,11 +59,11 @@ chromosome-specific files are generated for both maize and teosinte groups and s
 ```{r}
 process_and_save_files <- function(df, group_name, chromosome) { 
   df_inc <- df %>% 
-    filter(Chromosome == chromosome) %>% 
+    filter(as.character(Chromosome) == as.character(chromosome)) %>% 
     mutate(Position = as.numeric(as.character(Position))) %>% 
     arrange(Position) %>% 
     select(Chromosome, Position, everything()) %>% 
-    mutate(across(everything(), ~ifelse(is.na(.), "?", .))) 
+    mutate(across(everything(), ~ ifelse(is.na(.), "?", .))) 
   write.csv(
     df_inc, 
     sprintf("%s_chr%s_inc.csv", group_name, chromosome), 
@@ -71,11 +71,11 @@ process_and_save_files <- function(df, group_name, chromosome) {
     quote = FALSE
   ) 
   df_dec <- df %>% 
-    filter(Chromosome == chromosome) %>% 
+    filter(as.character(Chromosome) == as.character(chromosome)) %>% 
     mutate(Position = as.numeric(as.character(Position))) %>% 
     arrange(desc(Position)) %>% 
     select(Chromosome, Position, everything()) %>% 
-    mutate(across(everything(), ~ifelse(is.na(.), "-", .))) 
+    mutate(across(everything(), ~ ifelse(is.na(.), "-", .))) 
   write.csv(
     df_dec, 
     sprintf("%s_chr%s_dec.csv", group_name, chromosome), 
@@ -83,25 +83,37 @@ process_and_save_files <- function(df, group_name, chromosome) {
     quote = FALSE
   ) 
 }
+maize_group$Chromosome <- as.character(maize_group$Chromosome)
+teosinte_group$Chromosome <- as.character(teosinte_group$Chromosome)
+for (chr in as.character(1:10)) {
+  process_and_save_files(maize_group, "maize", chr)
+  process_and_save_files(teosinte_group, "teosinte", chr)
+}
 ```
 # Visualization
 ## Merge group is optimized for the visualization step and chromosomes are converted into an ordered factor (1–10). 
 ```{r}
-library(tidyverse) 
+library(tidyverse)
 library(ggplot2)
 merge_vis <- merge_group %>% 
   t() %>% 
   as.data.frame() %>% 
   slice(-1) %>% 
-  mutate( 
-    Chromosome = factor(as.character(Chromosome), levels = as.character(1:10)), 
-    Position = as.numeric(as.character(Position)) 
-  ) 
-maize_group$Chromosome <- factor(maize_group$Chromosome, levels = as.character(1:10)) 
-teosinte_group$Chromosome <- factor(teosinte_group$Chromosome, levels = as.character(1:10)) 
+  mutate(
+    Chromosome = factor(as.character(Chromosome), levels = as.character(1:10)),
+    Position = as.numeric(as.character(Position))
+  )
 maize_group <- maize_group %>% 
+  mutate(
+    Chromosome = factor(as.character(Chromosome), levels = as.character(1:10)),
+    Position = as.numeric(as.character(Position))
+  ) %>% 
   select(Chromosome, Position, everything())
 teosinte_group <- teosinte_group %>% 
+  mutate(
+    Chromosome = factor(as.character(Chromosome), levels = as.character(1:10)),
+    Position = as.numeric(as.character(Position))
+  ) %>% 
   select(Chromosome, Position, everything())
 ```
 ### Answer 01: 
